@@ -28,9 +28,18 @@ class Cell:
     
     def visit(self):
         if(not self.vst):
+           
+            scrn = self.scrn
+            pos = self.pos
+            sz = self.sz
+            lw = self.lw
+
             self.vst = True
-            pg.draw.rect(self.scrn, vst_clr, pg.Rect(self.pos[0], self.pos[1], self.sz[0], self.sz[1]))
-            pg.draw.rect(self.scrn, line_clr, pg.Rect(self.pos[0], self.pos[1], self.sz[0], self.sz[1]), self.lw)
+            pg.draw.rect(scrn, vst_clr, pg.Rect(pos[0], pos[1], sz[0], sz[1]))
+            pg.draw.line(scrn, line_clr, (pos[0],pos[1]), (pos[0]+sz[0],pos[1]), lw)
+            pg.draw.line(scrn, line_clr, (pos[0]+sz[0],pos[1]), (pos[0]+sz[0],pos[1]+sz[1]), lw)
+            pg.draw.line(scrn, line_clr, (pos[0]+sz[0],pos[1]+sz[1]), (pos[0],pos[1]+sz[1]), lw)
+            pg.draw.line(scrn, line_clr, (pos[0],pos[1]+sz[1]), (pos[0],pos[1]), lw)
 
     def removeWall(self, dir):
         scrn = self.scrn
@@ -40,19 +49,19 @@ class Cell:
 
         if(dir == "top"):
             self.walls[0] = False
-            pg.draw.line(scrn, vst_clr, (pos[0],pos[1]-lw/2), (pos[0]+sz[0],pos[1]-lw/2), lw)
+            pg.draw.line(scrn, vst_clr, (pos[0],pos[1]), (pos[0]+sz[0],pos[1]), lw)
 
         elif(dir == "right"):
             self.walls[1] = False
-            pg.draw.line(scrn, vst_clr, (pos[0]+sz[0]-lw/2,pos[1]), (pos[0]+sz[0]-lw/2,pos[1]+sz[1]), lw)
+            pg.draw.line(scrn, vst_clr, (pos[0]+sz[0],pos[1]), (pos[0]+sz[0],pos[1]+sz[1]), lw)
 
         elif(dir == "bottom"):
             self.walls[2] = False
-            pg.draw.line(scrn, vst_clr, (pos[0]+sz[0],pos[1]+sz[1]+lw/2), (pos[0],pos[1]+sz[1]+lw/2), lw)
+            pg.draw.line(scrn, vst_clr, (pos[0]+sz[0],pos[1]+sz[1]), (pos[0],pos[1]+sz[1]), lw)
 
         elif(dir == "left"):
             self.walls[3] = False
-            pg.draw.line(scrn, vst_clr, (pos[0],pos[1]+sz[1]-lw/2), (pos[0],pos[1]-lw/2), lw)
+            pg.draw.line(scrn, vst_clr, (pos[0],pos[1]+sz[1]), (pos[0],pos[1]), lw)
     
 class Maze:
     def __init__(self, rows, cols, scrn, scrn_sz, margin):
@@ -130,7 +139,7 @@ class Maze:
                 cell_stack.append(chosen)
                 self.removeWall(current, chosen)
                 pg.display.flip()
-                time.sleep(0.5)
+                time.sleep(0.02)
 
 
 def main():
