@@ -43,29 +43,47 @@ def drawMaze(dfs_maze, screen):     # draws maze
             if(crnt_cell.walls[3]): # left wall
                 pg.draw.line(screen, color, (x, y+sp_y), (x, y), wall_w)
 
-def inRein(dfs_maze, x, y):     # returns true if the player position is legal
+def dis(a_x, a_y, b_x, b_y):    # returns distance between two points
+    distance = (a_x-b_x)**2 + (a_y-b_y)**2
+    distance = distance ** 0.5
+    return distance
 
-    # if not (x-plr_sz>=margin_x+wall_w and x+plr_sz<=screen_w-margin_x-wall_w\
-    # and y-plr_sz>=margin_y+wall_w and y+plr_sz<=screen_h-margin_y-wall_w):
-    #     return False
+def inRein(dfs_maze, x, y):     # returns true if the player position is legal
 
     row = int((y - margin_y)/sp_y) 
     col = int((x - margin_x)/sp_x)
     crnt_cell = dfs_maze.maze[row][col]
 
+    top_y = margin_y + row*sp_y
+    btm_y = top_y + sp_y
+    left_x = margin_x + col*sp_x
+    right_x = left_x + sp_x
+
     # top
-    if(y - plr_sz < margin_y + row*sp_y and crnt_cell.walls[0]):
+    if(y - plr_sz < top_y and crnt_cell.walls[0]):
         return False
     # bottom
-    if(y + plr_sz > margin_y + (row+1)*sp_y and crnt_cell.walls[2]):
+    if(y + plr_sz > btm_y and crnt_cell.walls[2]):
         return False
     # left
-    if(x - plr_sz < margin_x + col*sp_x and crnt_cell.walls[3]):
+    if(x - plr_sz < left_x and crnt_cell.walls[3]):
         return False
     # right
-    if(x + plr_sz > margin_x + (col+1)*sp_x and crnt_cell.walls[1]):
+    if(x + plr_sz > right_x and crnt_cell.walls[1]):
         return False
-    
+    # top left
+    if(dis(x,y,left_x,top_y) < plr_sz):
+        return False
+    # top right
+    if(dis(x,y,right_x,top_y) < plr_sz):
+        return False
+    # bottom left
+    if(dis(x,y,left_x,btm_y) < plr_sz):
+        return False
+    # bottom right
+    if(dis(x,y,right_x,btm_y) < plr_sz):
+        return False
+
     return True
 
 def winGame(x, y):
