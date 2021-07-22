@@ -1,10 +1,40 @@
 import pygame as pg
 
-dft_clr = (235, 187, 255)   # jade green
-hvr_clr = (239, 105, 102)   # light vermillion
-act_clr = (255, 167, 105)   # pastel orange
-btnt_clr= (  0,  52, 110)   # china blue
+dft_clr  = (235, 187, 255)  # jade green
+hvr_clr  = (239, 105, 102)  # light vermillion
+act_clr  = (255, 167, 105)  # pastel orange
+btnt_clr = (  0,  52, 110)  # china blue
+hint_clr = (  0,  36,  81)  # black blue
+hbox_clr = (153, 255, 255)  # azure
+icn_o_clr= (255, 255, 255)  # white
+icn_clr  = (235, 187, 255)  # lavendar
+bg_clr   = (0, 36, 81)      # muted indigo
 
+class Icon():
+    def __init__(self, screen, image_path, x_pos, y_pos, factor):
+        self.scrn = screen
+        self.x = x_pos
+        self.y = y_pos
+
+        icon = pg.image.load(image_path)
+        scale = icon.get_size()
+        self.w = int(scale[0]*factor)
+        self.h = int(scale[1]*factor)
+        icon = pg.transform.scale(icon, (self.w,self.h))
+        icon = self.colorSwap(icon, (0,0,0), bg_clr)
+        icon = self.colorSwap(icon, icn_o_clr, icn_clr)
+        self.icon = icon
+        self.scrn.blit(self.icon, (self.x, self.y))
+    
+    def draw(self):
+        self.scrn.blit(self.icon, (self.x, self.y))
+    
+    def colorSwap(self, img, old_clr, new_clr):
+        new_img = pg.Surface(img.get_size())
+        new_img.fill(new_clr)
+        img.set_colorkey(old_clr)
+        new_img.blit(img, (0,0))
+        return new_img    
 
 class Text():
     def __init__(self, screen, text, x_pos, y_pos, color, size, a):
@@ -24,20 +54,23 @@ class Text():
         if(self.a == "MID"):
             x = self.x_ref - self.txt.get_width()/2
             y = self.y_ref - self.txt.get_height()/2
-        elif(self.a == "RIGHT"):
+        elif(self.a == "LEFT"):
             x = self.x_ref
             y = self.y_ref
-        elif(self.a == "LEFT"):
+        elif(self.a == "RIGHT"):
             x = self.x_ref - self.txt.get_width()
             y = self.y_ref - self.txt.get_height()
         return x,y
 
     def toggleTxt(self, text):
         self.txt = self.font.render(text, 1, self.clr)
-        self.align()
+        self.x, self.y = self.align()
     
     def draw(self):
         self.scrn.blit(self.txt, (self.x, self.y))
+    
+    def len(self):
+        return self.txt.get_width()
 
 class Button():
     def __init__(self, screen, text, x_pos, y_pos, width, height):
@@ -92,4 +125,17 @@ class Button():
         pg.draw.circle(self.scrn, color, (self.x-self.w/2, self.y), self.h/2)
         pg.draw.circle(self.scrn, color, (self.x+self.w/2, self.y), self.h/2)
         self.btn_txt.draw()
+
+class HintBox():
+    def __init__(self, screen, x_pos, y_pos, text, txt_size):
+        self.scrn = screen
+        self.x = x_pos
+        self.y = y_pos
+        self.hint = Text(self.scrn, text, self.x, self.y, hint_clr, 20 , "MID")
+        self.w = self.hint.len() * 1.2
+        self.h = txt_size * 1.2
+    
+    def show(self):
+        pg.draw.rect(self.scrn, hbox_clr, (self.x, self.y, self.w, self.h))
+        self.hint.draw()
 

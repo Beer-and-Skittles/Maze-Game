@@ -106,6 +106,12 @@ def maskup(screen):
             pg.draw.line(screen, color, (x+sp_x, y+sp_y), (x, y+sp_y), wall_w)
             pg.draw.line(screen, color, (x, y+sp_y), (x, y), wall_w)
 
+def colorSwap(img, old_clr, new_clr):
+    new_img = pg.Surface(img.get_size())
+    new_img.fill(new_clr)
+    img.set_colorkey(old_clr)
+    new_img.blit(img, (0,0))
+    return new_img
 
 def main():
 
@@ -135,10 +141,28 @@ def main():
     time_txt = gb.Text(screen, "time:", 165, 900, txt_clr, 50, "LEFT")
     wins_txt  = gb.Text(screen, "wins:", 165, 960, txt_clr, 50, "LEFT")
 
-    # init buttons
-    ng_btn = gb.Button(screen, "new game", 400, 820, 150, 50)
-    ps_btn = gb.Button(screen, "pause", 165, 820, 150, 50)
-    cl_btn = gb.Button(screen, "clear rcd", 635, 820, 150, 50)
+    # # init buttons
+    # ng_btn = gb.Button(screen, "new game", 400, 820, 150, 50)
+    # ps_btn = gb.Button(screen, "pause", 165, 820, 150, 50)
+    # cl_btn = gb.Button(screen, "clear rcd", 635, 820, 150, 50)
+
+    # init icons
+    folder_path = 'C:/Users/blake/Desktop/git/maze-game'
+    icons = []
+    easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 60, 800, 0.15)
+    ps_cn_icon  = gb.Icon(screen, folder_path+'/source/pause.png', 180, 800, 0.15)
+    nwg_icon    = gb.Icon(screen, folder_path+'/source/new_game.png', 290, 800, 0.15)
+    music_icon  = gb.Icon(screen, folder_path+'/source/music.png', 400, 800, 0.15)
+    clear_icon  = gb.Icon(screen, folder_path+'/source/clear.png', 535, 800, 0.15)
+    harder_icon = gb.Icon(screen, folder_path+'/source/harder.png', 660, 800, 0.15)
+    
+    icons.append(clear_icon)
+    icons.append(ps_cn_icon)
+    icons.append(easier_icon)
+    icons.append(harder_icon)
+    icons.append(music_icon)
+    icons.append(nwg_icon)
+
 
     game = True
     while(game):
@@ -154,46 +178,46 @@ def main():
             if(event.type == pg.KEYDOWN and not paused):
                 key_pressed = True
             
-            if(event.type == pg.MOUSEMOTION):
-                mouse_x, mouse_y = pg.mouse.get_pos()
-                ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+            # if(event.type == pg.MOUSEMOTION):
+                # mouse_x, mouse_y = pg.mouse.get_pos()
+                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
             
-            if(event.type == pg.MOUSEBUTTONUP):
-                ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+            # if(event.type == pg.MOUSEBUTTONUP):
+                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
             
-            if(event.type == pg.MOUSEBUTTONDOWN):
-                ng_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
-                ps_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
-                cl_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
+            # if(event.type == pg.MOUSEBUTTONDOWN):
+                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
+                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
+                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
 
-                if(ng_btn.state == "ACTIVE"):
-                    new_game = True
-                elif(ps_btn.state == "ACTIVE"):
-                    ps_clicked = True
+                # if(ng_btn.state == "ACTIVE"):
+                #     new_game = True
+                # elif(ps_btn.state == "ACTIVE"):
+                #     ps_clicked = True
 
-        if(ps_clicked):     # pause/continue button clicked
-            ps_clicked = False
-            if(paused):     # game paused -> game continue
-                ps_btn.toggleTxt("pause")
-                key_pressed = False
-                paused = False
-                new_game = False
-            else:           # game ongoing -> pause game
-                ps_btn.toggleTxt("continue")
-                paused = True
+        # if(ps_clicked):     # pause/continue button clicked
+        #     ps_clicked = False
+        #     if(paused):     # game paused -> game continue
+        #         ps_btn.toggleTxt("pause")
+        #         key_pressed = False
+        #         paused = False
+        #         new_game = False
+        #     else:           # game ongoing -> pause game
+        #         ps_btn.toggleTxt("continue")
+        #         paused = True
 
-        if(new_game and not paused):       # start new game
-            new_game = False
-            key_pressed = False
-            screen.fill(bg_clr)
-            plr_x = margin_x + sp_x/2
-            plr_y = margin_y + sp_y/2
-            dfs_maze = dfs.Maze(maze_row, maze_col)
-            dfs_maze.buildMaze()
+        # if(new_game and not paused):       # start new game
+        #     new_game = False
+        #     key_pressed = False
+        #     screen.fill(bg_clr)
+        #     plr_x = margin_x + sp_x/2
+        #     plr_y = margin_y + sp_y/2
+        #     dfs_maze = dfs.Maze(maze_row, maze_col)
+        #     dfs_maze.buildMaze()
         
         if(key_pressed):    # a key is pressed
             if(event.key == pg.K_UP):
@@ -224,12 +248,13 @@ def main():
             pg.draw.circle(screen, plr_clr, (plr_x, plr_y), plr_sz)
             drawMaze(dfs_maze, screen)
 
-        ng_btn.draw()
-        ps_btn.draw()
-        cl_btn.draw()
+        # ng_btn.draw()
+        # ps_btn.draw()
+        # cl_btn.draw()
+        for i in icons:
+            i.draw()
         time_txt.draw()
         wins_txt.draw()
-        
         pg.display.update()
 
 if __name__ == '__main__':
