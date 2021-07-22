@@ -7,24 +7,27 @@ import time
 
 field_h = 800
 field_w = 800
-gm_bar_h = 200
+gm_bar_h = 150
 margin_x = 70
 margin_y = 70 
-maze_row = 5
-maze_col = 5
-sp_x = (field_w - 2*margin_x)/maze_col
-sp_y = (field_h - 2*margin_y)/maze_row
-wall_w   = 3
+dft_row = 10
+dft_col = 10
+rc_l_bnd = 5
+rc_h_bnd = 30
+wall_w   = 5
 unit_len = 1
 plr_sz   = 10
 
 bg_clr   = (0, 36, 81)      # muted indigo
-plr_clr  = (156, 36, 81)    # wine red
+plr_clr  = (255, 0, 0)      # red
 txt_clr  = (153, 255, 255)  # azure
 maze_clr = [(235, 187, 255), (255, 197, 143), (255, 238, 164), (115, 201, 145)]
-# lavender, pastel orange, pastel yellowm, avocado
+# lavender, pastel orange, pastel yellow, avocado
 
-def drawMaze(dfs_maze, screen):     # draws maze
+def drawMaze(dfs_maze, screen, maze_row, maze_col):     # draws maze
+
+    sp_x = (field_w - 2*margin_x)/maze_col
+    sp_y = (field_h - 2*margin_y)/maze_row
 
     for r in range(maze_row):
         for c in range(maze_col):
@@ -49,8 +52,9 @@ def drawMaze(dfs_maze, screen):     # draws maze
 def dis(a_x, a_y, b_x, b_y):    # returns distance between two points
     return pow( pow(a_x-b_x, 2) + pow(a_y-b_y, 2), 0.5)
 
-def inRein(dfs_maze, x, y):     # returns true if the player position is legal
-
+def inRein(dfs_maze, x, y, maze_row, maze_col):     # returns true if the player position is legal
+    sp_x = (field_w - 2*margin_x)/maze_col
+    sp_y = (field_h - 2*margin_y)/maze_row
     row = int((y - margin_y)/sp_y) 
     col = int((x - margin_x)/sp_x)
     crnt_cell = dfs_maze.maze[row][col]
@@ -87,14 +91,18 @@ def inRein(dfs_maze, x, y):     # returns true if the player position is legal
 
     return True
 
-def winGame(x, y):
+def winGame(x, y, maze_row, maze_col):
+    sp_x = (field_w - 2*margin_x)/maze_col  
+    sp_y = (field_h - 2*margin_y)/maze_row
     row = int((y - margin_y)/sp_y)
     col = int((x - margin_x)/sp_x)
     if(row+1 == maze_row and col+1 == maze_col):
         return True
     return False
 
-def maskup(screen):
+def maskup(screen, maze_row, maze_col):
+    sp_x = (field_w - 2*margin_x)/maze_col
+    sp_y = (field_h - 2*margin_y)/maze_row
     for r in range(maze_row):
         for c in range(maze_col):
             color = maze_clr[int(r/maze_row*len(maze_clr))]
@@ -125,45 +133,52 @@ def main():
     new_game = False
     paused = False
     ps_clicked = False
+    time_ref = 0
+    time_sh = 0
+    wins = 0
     mouse_x, mouse_y = pg.mouse.get_pos()
 
     # init maze
+    maze_row = dft_row
+    maze_col = dft_col
     dfs_maze = dfs.Maze(maze_row, maze_col)
     dfs_maze.buildMaze()
-    drawMaze(dfs_maze, screen)
+    drawMaze(dfs_maze, screen, maze_row, maze_col)
 
     # init player
+    sp_x = (field_w - 2*margin_x)/maze_col
+    sp_y = (field_h - 2*margin_y)/maze_row
     plr_x = margin_x + sp_x/2
     plr_y = margin_y + sp_y/2
     pg.draw.circle(screen, plr_clr, (plr_x, plr_y), plr_sz)
 
     # init texts
-    time_txt = gb.Text(screen, "time:", 165, 900, txt_clr, 50, "LEFT")
-    wins_txt  = gb.Text(screen, "wins:", 165, 960, txt_clr, 50, "LEFT")
-
-    # # init buttons
-    # ng_btn = gb.Button(screen, "new game", 400, 820, 150, 50)
-    # ps_btn = gb.Button(screen, "pause", 165, 820, 150, 50)
-    # cl_btn = gb.Button(screen, "clear rcd", 635, 820, 150, 50)
+    t_dsp_txt = gb.Text(screen, "TIME:", 65, 875, txt_clr, 50, "LEFT")
+    w_dsp_txt = gb.Text(screen, "VICTORIES:", 400, 875, txt_clr, 50, "LEFT")
+    t_rec_txt = gb.Text(screen, "", 350, 875, txt_clr, 50, "RIGHT")
+    w_rec_txt = gb.Text(screen, str(wins), 735, 875, txt_clr, 50, "RIGHT")
 
     # init icons
+    all_icons = []
+    icon_dict = {"ESR":0, "P_C":1, "NWG":2, "MSC":3, "CLR":4, "HDR":5}
     folder_path = 'C:/Users/blake/Desktop/git/maze-game'
-    icons = []
-    easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 60, 800, 0.15)
-    ps_cn_icon  = gb.Icon(screen, folder_path+'/source/pause.png', 180, 800, 0.15)
-    nwg_icon    = gb.Icon(screen, folder_path+'/source/new_game.png', 290, 800, 0.15)
-    music_icon  = gb.Icon(screen, folder_path+'/source/music.png', 400, 800, 0.15)
-    clear_icon  = gb.Icon(screen, folder_path+'/source/clear.png', 535, 800, 0.15)
-    harder_icon = gb.Icon(screen, folder_path+'/source/harder.png', 660, 800, 0.15)
+    p_img_path  = folder_path + '/source/pause.png'
+    c_img_path  = folder_path + '/source/continue.png'
+    easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 58, 760, 0.15)
+    ps_cn_icon  = gb.Icon(screen, folder_path+'/source/pause.png', 180, 760, 0.15)
+    nwg_icon    = gb.Icon(screen, folder_path+'/source/new_game.png', 300, 760, 0.15)
+    music_icon  = gb.Icon(screen, folder_path+'/source/music.png', 415, 760, 0.15)
+    clear_icon  = gb.Icon(screen, folder_path+'/source/clear.png', 540, 760, 0.15)
+    harder_icon = gb.Icon(screen, folder_path+'/source/harder.png', 658, 760, 0.15)
     
-    icons.append(clear_icon)
-    icons.append(ps_cn_icon)
-    icons.append(easier_icon)
-    icons.append(harder_icon)
-    icons.append(music_icon)
-    icons.append(nwg_icon)
-
-
+    all_icons.append(easier_icon)
+    all_icons.append(ps_cn_icon)
+    all_icons.append(nwg_icon)
+    all_icons.append(music_icon)
+    all_icons.append(clear_icon)
+    all_icons.append(harder_icon)
+    
+    time_ref = time.time()
     game = True
     while(game):
         time.sleep(0.002)
@@ -178,84 +193,121 @@ def main():
             if(event.type == pg.KEYDOWN and not paused):
                 key_pressed = True
             
-            # if(event.type == pg.MOUSEMOTION):
-                # mouse_x, mouse_y = pg.mouse.get_pos()
-                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+            if(event.type == pg.MOUSEMOTION):
+                mouse_x, mouse_y = pg.mouse.get_pos()
+                for icns in all_icons:
+                    icns.updateState(mouse_x, mouse_y, "MOUSEUP")
             
-            # if(event.type == pg.MOUSEBUTTONUP):
-                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
-                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEUP")
+            if(event.type == pg.MOUSEBUTTONUP):
+                for icns in all_icons:
+                    icns.updateState(mouse_x, mouse_y, "MOUSEUP")
             
-            # if(event.type == pg.MOUSEBUTTONDOWN):
-                # ng_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
-                # ps_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
-                # cl_btn.updateState(mouse_x, mouse_y, "MOUSEDOWN")
+            if(event.type == pg.MOUSEBUTTONDOWN):
+                for icns in all_icons:
+                    icns.updateState(mouse_x, mouse_y, "MOUSEDOWN")
 
-                # if(ng_btn.state == "ACTIVE"):
-                #     new_game = True
-                # elif(ps_btn.state == "ACTIVE"):
-                #     ps_clicked = True
+                # operations for clicked icons
+                if(all_icons[icon_dict["NWG"]].state == "ACTIVE"):
+                    new_game = True
+                
+                elif(all_icons[icon_dict["CLR"]].state == "ACTIVE"):
+                    new_game = True
+                    maze_row = dft_row
+                    maze_col = dft_col
+                    wins = 0
+                    w_rec_txt.toggleTxt(str(wins)) 
+                
+                elif(all_icons[icon_dict["MSC"]].state == "ACTIVE"):
+                    pass
 
-        # if(ps_clicked):     # pause/continue button clicked
-        #     ps_clicked = False
-        #     if(paused):     # game paused -> game continue
-        #         ps_btn.toggleTxt("pause")
-        #         key_pressed = False
-        #         paused = False
-        #         new_game = False
-        #     else:           # game ongoing -> pause game
-        #         ps_btn.toggleTxt("continue")
-        #         paused = True
+                elif(all_icons[icon_dict["P_C"]].state == "ACTIVE"):
+                    ps_clicked = True
 
-        # if(new_game and not paused):       # start new game
-        #     new_game = False
-        #     key_pressed = False
-        #     screen.fill(bg_clr)
-        #     plr_x = margin_x + sp_x/2
-        #     plr_y = margin_y + sp_y/2
-        #     dfs_maze = dfs.Maze(maze_row, maze_col)
-        #     dfs_maze.buildMaze()
+                elif(all_icons[icon_dict["ESR"]].state == "ACTIVE"):
+                    if(maze_row > rc_l_bnd):
+                        new_game = True
+                        maze_row -= 1
+                        maze_col -= 1
+
+                elif(all_icons[icon_dict["HDR"]].state == "ACTIVE"):
+                    if(maze_row < rc_h_bnd):
+                        new_game = True
+                        maze_row += 1
+                        maze_col += 1
+          
+        if(ps_clicked):     # pause/continue icon clicked
+            ps_clicked = False
+            if(paused):     # game paused -> game continue
+                print("pause image on")
+                all_icons[icon_dict["P_C"]].loadImg(p_img_path)
+                key_pressed = False
+                paused = False
+                new_game = False
+                time_ref = time.time()
+            else:           # game ongoing -> pause game
+                print("continue image on")
+                all_icons[icon_dict["P_C"]].loadImg(c_img_path)
+                paused = True
+                time_sh = time.time() - time_ref
+
+        if(new_game and not paused):       # start new game
+            new_game = False
+            key_pressed = False
+            screen.fill(bg_clr)
+            sp_x = (field_w - 2*margin_x)/maze_col
+            sp_y = (field_h - 2*margin_y)/maze_row
+            plr_x = margin_x + sp_x/2
+            plr_y = margin_y + sp_y/2
+            dfs_maze = dfs.Maze(maze_row, maze_col)
+            dfs_maze.buildMaze()
+            time_ref = time.time()
+            time_sh = 0
         
         if(key_pressed):    # a key is pressed
             if(event.key == pg.K_UP):
-                if(inRein(dfs_maze, plr_x, plr_y-unit_len)):
+                if(inRein(dfs_maze, plr_x, plr_y-unit_len, maze_row, maze_col)):
                     plr_y -= unit_len
 
             elif(event.key == pg.K_DOWN):
-                if(inRein(dfs_maze, plr_x, plr_y+unit_len)):
+                if(inRein(dfs_maze, plr_x, plr_y+unit_len, maze_row, maze_col)):
                     plr_y += unit_len
 
             elif(event.key == pg.K_RIGHT):
-                if(inRein(dfs_maze, plr_x+unit_len, plr_y)):
+                if(inRein(dfs_maze, plr_x+unit_len, plr_y, maze_row, maze_col)):
                     plr_x += unit_len
 
             elif(event.key == pg.K_LEFT):
-                if(inRein(dfs_maze, plr_x-unit_len, plr_y)):
+                if(inRein(dfs_maze, plr_x-unit_len, plr_y, maze_row, maze_col)):
                     plr_x -= unit_len
             
-            if(winGame(plr_x, plr_y)):
+            if(winGame(plr_x, plr_y, maze_row, maze_col)):  # current game is won
                 new_game = True
+                wins += 1
+                w_rec_txt.toggleTxt(str(wins))
             
         # draw game elements
         screen.fill(bg_clr)
 
         if(paused):
-            maskup(screen)
+            maskup(screen, maze_row, maze_col)
+            t_rec_txt.toggleTxt(str(round(time_sh, 2)))
+            # print(round(time_sh, 2))
         else:
             pg.draw.circle(screen, plr_clr, (plr_x, plr_y), plr_sz)
-            drawMaze(dfs_maze, screen)
+            drawMaze(dfs_maze, screen, maze_row, maze_col)
+            t_rec_txt.toggleTxt(str(round(time_sh + time.time()-time_ref, 2)))
+            # print(round(time_sh + time.time()-time_ref,2))
 
-        # ng_btn.draw()
-        # ps_btn.draw()
-        # cl_btn.draw()
-        for i in icons:
+        for i in all_icons:
             i.draw()
-        time_txt.draw()
-        wins_txt.draw()
+
+        t_dsp_txt.draw()
+        w_dsp_txt.draw()
+        t_rec_txt.draw()
+        w_rec_txt.draw()
         pg.display.update()
+
+
 
 if __name__ == '__main__':
     main()
