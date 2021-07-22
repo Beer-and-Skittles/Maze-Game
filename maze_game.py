@@ -123,10 +123,25 @@ def colorSwap(img, old_clr, new_clr):
 
 def main():
 
-    # init screen
-    pg.init(),
+    # set screen
+    pg.init()
     screen = pg.display.set_mode((field_w ,field_h + gm_bar_h))
     screen.fill(bg_clr)
+
+    # set music
+    folder_path = 'C:/Users/blake/Desktop/git/maze-game'
+    sound_on = True
+    pg.mixer.init()
+    pg.mixer.music.set_volume(0.3)
+    pg.mixer.music.load(folder_path + '/source/bg.mp3')
+    pg.mixer.music.play(-1)
+
+    # set sound effects
+    click_sound = pg.mixer.Sound(folder_path + '/source/click.mp3')
+    hover_sound = pg.mixer.Sound(folder_path + '/source/hover.mp3')
+    victr_sound = pg.mixer.Sound(folder_path + '/source/victory.mp3')
+    swish_sound = pg.mixer.Sound(folder_path + '/source/swish.wav')
+    
 
     # init state variables
     key_pressed = False
@@ -154,14 +169,13 @@ def main():
 
     # init texts
     t_dsp_txt = gb.Text(screen, "TIME:", 65, 875, txt_clr, 50, "LEFT")
-    w_dsp_txt = gb.Text(screen, "VICTORIES:", 400, 875, txt_clr, 50, "LEFT")
-    t_rec_txt = gb.Text(screen, "", 350, 875, txt_clr, 50, "RIGHT")
+    w_dsp_txt = gb.Text(screen, "VICTORIES:", 445, 875, txt_clr, 50, "LEFT")
+    t_rec_txt = gb.Text(screen, "", 370, 875, txt_clr, 50, "RIGHT")
     w_rec_txt = gb.Text(screen, str(wins), 735, 875, txt_clr, 50, "RIGHT")
 
     # init icons
     all_icons = []
     icon_dict = {"ESR":0, "P_C":1, "NWG":2, "MSC":3, "CLR":4, "HDR":5}
-    folder_path = 'C:/Users/blake/Desktop/git/maze-game'
     p_img_path  = folder_path + '/source/pause.png'
     c_img_path  = folder_path + '/source/continue.png'
     easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 58, 760, 0.15)
@@ -192,11 +206,13 @@ def main():
 
             if(event.type == pg.KEYDOWN and not paused):
                 key_pressed = True
+                pg.mixer.Sound.play(swish_sound)
             
             if(event.type == pg.MOUSEMOTION):
                 mouse_x, mouse_y = pg.mouse.get_pos()
                 for icns in all_icons:
-                    icns.updateState(mouse_x, mouse_y, "MOUSEUP")
+                    if(icns.updateState(mouse_x, mouse_y, "MOUSEUP")):
+                        pg.mixer.Sound.play(hover_sound)
             
             if(event.type == pg.MOUSEBUTTONUP):
                 for icns in all_icons:
@@ -205,6 +221,8 @@ def main():
             if(event.type == pg.MOUSEBUTTONDOWN):
                 for icns in all_icons:
                     icns.updateState(mouse_x, mouse_y, "MOUSEDOWN")
+                    if(icns.state == "ACTIVE"):
+                        pg.mixer.Sound.play(click_sound)
 
                 # operations for clicked icons
                 if(all_icons[icon_dict["NWG"]].state == "ACTIVE"):
@@ -218,7 +236,12 @@ def main():
                     w_rec_txt.toggleTxt(str(wins)) 
                 
                 elif(all_icons[icon_dict["MSC"]].state == "ACTIVE"):
-                    pass
+                    if(sound_on):
+                        pg.mixer.music.set_volume(0)
+                    else:
+                        pg.mixer.music.set_volume(0.5)
+
+                    sound_on = not sound_on
 
                 elif(all_icons[icon_dict["P_C"]].state == "ACTIVE"):
                     ps_clicked = True
@@ -248,7 +271,7 @@ def main():
                 print("continue image on")
                 all_icons[icon_dict["P_C"]].loadImg(c_img_path)
                 paused = True
-                time_sh = time.time() - time_ref
+                time_sh = time_sh + time.time() - time_ref
 
         if(new_game and not paused):       # start new game
             new_game = False
@@ -281,6 +304,7 @@ def main():
                     plr_x -= unit_len
             
             if(winGame(plr_x, plr_y, maze_row, maze_col)):  # current game is won
+                pg.mixer.Sound.play(victr_sound)
                 new_game = True
                 wins += 1
                 w_rec_txt.toggleTxt(str(wins))
@@ -291,12 +315,11 @@ def main():
         if(paused):
             maskup(screen, maze_row, maze_col)
             t_rec_txt.toggleTxt(str(round(time_sh, 2)))
-            # print(round(time_sh, 2))
+
         else:
             pg.draw.circle(screen, plr_clr, (plr_x, plr_y), plr_sz)
             drawMaze(dfs_maze, screen, maze_row, maze_col)
-            t_rec_txt.toggleTxt(str(round(time_sh + time.time()-time_ref, 2)))
-            # print(round(time_sh + time.time()-time_ref,2))
+            t_rec_txt.toggleTxt(str(round(time_sh + time.time() - time_ref, 2)))
 
         for i in all_icons:
             i.draw()

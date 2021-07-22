@@ -19,6 +19,7 @@ class Icon():
     
     def __init__(self, screen, image_path, x_pos, y_pos, factor):
         self.state = "DEFAULT"  # DEFAULT, HOVER, ACTIVE
+        self.was = ""
         self.scrn = screen
         self.fct = factor
         self.x = x_pos
@@ -44,6 +45,8 @@ class Icon():
         if(mouse_x>=self.x and mouse_x<=self.x+self.w and mouse_y>=self.y and mouse_y<=self.y+self.h):
             if(state == "MOUSEUP"):
                 self.state = "HOVER"
+                if(self.was == "DEFAULT"):
+                    return True
             elif(state == "MOUSEDOWN"):
                 self.state = "ACTIVE"
         else:
@@ -69,6 +72,7 @@ class Icon():
         elif(self.state == "DEFAULT"):
             color = icn_dft_clr
 
+        self.was = self.state
         self.icon = self.colorSwap(self.icon, self.clr, color)
         self.clr = color
         self.scrn.blit(self.icon, (self.x, self.y))
