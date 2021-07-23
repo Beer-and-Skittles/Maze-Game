@@ -131,16 +131,16 @@ def main():
     # set music
     folder_path = 'C:/Users/blake/Desktop/git/maze-game'
     sound_on = True
-    pg.mixer.init()
-    pg.mixer.music.set_volume(0.3)
-    pg.mixer.music.load(folder_path + '/source/bg.mp3')
-    pg.mixer.music.play(-1)
+    # pg.mixer.init()
+    # pg.mixer.music.set_volume(0.3)
+    # pg.mixer.music.load(folder_path + '/source/bg.mp3')
+    # pg.mixer.music.play(-1)
 
     # set sound effects
-    click_sound = pg.mixer.Sound(folder_path + '/source/click.mp3')
-    hover_sound = pg.mixer.Sound(folder_path + '/source/hover.mp3')
-    victr_sound = pg.mixer.Sound(folder_path + '/source/victory.mp3')
-    swish_sound = pg.mixer.Sound(folder_path + '/source/swish.wav')
+    # click_sound = pg.mixer.Sound(folder_path + '/source/click.mp3')
+    # hover_sound = pg.mixer.Sound(folder_path + '/source/hover.mp3')
+    # victr_sound = pg.mixer.Sound(folder_path + '/source/victory.mp3')
+    # swish_sound = pg.mixer.Sound(folder_path + '/source/swish.wav')
     
 
     # init state variables
@@ -206,13 +206,14 @@ def main():
 
             if(event.type == pg.KEYDOWN and not paused):
                 key_pressed = True
-                pg.mixer.Sound.play(swish_sound)
+                # pg.mixer.Sound.play(swish_sound)
             
             if(event.type == pg.MOUSEMOTION):
                 mouse_x, mouse_y = pg.mouse.get_pos()
                 for icns in all_icons:
                     if(icns.updateState(mouse_x, mouse_y, "MOUSEUP")):
-                        pg.mixer.Sound.play(hover_sound)
+                        pass
+                        # pg.mixer.Sound.play(hover_sound)
             
             if(event.type == pg.MOUSEBUTTONUP):
                 for icns in all_icons:
@@ -222,7 +223,8 @@ def main():
                 for icns in all_icons:
                     icns.updateState(mouse_x, mouse_y, "MOUSEDOWN")
                     if(icns.state == "ACTIVE"):
-                        pg.mixer.Sound.play(click_sound)
+                        pass
+                        # pg.mixer.Sound.play(click_sound)
 
                 # operations for clicked icons
                 if(all_icons[icon_dict["NWG"]].state == "ACTIVE"):
@@ -236,10 +238,10 @@ def main():
                     w_rec_txt.toggleTxt(str(wins)) 
                 
                 elif(all_icons[icon_dict["MSC"]].state == "ACTIVE"):
-                    if(sound_on):
-                        pg.mixer.music.set_volume(0)
-                    else:
-                        pg.mixer.music.set_volume(0.5)
+                    # if(sound_on):
+                    #     pg.mixer.music.set_volume(0)
+                    # else:
+                    #     pg.mixer.music.set_volume(0.5)
 
                     sound_on = not sound_on
 
@@ -304,7 +306,7 @@ def main():
                     plr_x -= unit_len
             
             if(winGame(plr_x, plr_y, maze_row, maze_col)):  # current game is won
-                pg.mixer.Sound.play(victr_sound)
+                # pg.mixer.Sound.play(victr_sound)
                 new_game = True
                 wins += 1
                 w_rec_txt.toggleTxt(str(wins))
