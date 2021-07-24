@@ -9,7 +9,7 @@ field_h = 800
 field_w = 800
 gm_bar_h = 150
 margin_x = 70
-margin_y = 70 
+margin_y = 70
 dft_row = 10
 dft_col = 10
 rc_l_bnd = 5
@@ -134,7 +134,7 @@ def main():
     pg.mixer.init()
     pg.mixer.music.set_volume(0.3)
     pg.mixer.music.load(folder_path + '/source/bg.mp3')
-    # pg.mixer.music.play(-1)
+    pg.mixer.music.play(-1)
 
     # set sound effects
     click_sound = pg.mixer.Sound(folder_path + '/source/click.mp3')
@@ -175,12 +175,12 @@ def main():
 
     # init hintbox
     hb_y = 828
-    esr_hb = gb.HintBox(screen,  90, hb_y, "easier maze", 100)
-    p_c_hb = gb.HintBox(screen, 220, hb_y, "pause/continue", 160)
-    nwg_hb = gb.HintBox(screen, 340, hb_y, "new game", 90)
-    msc_hb = gb.HintBox(screen, 460, hb_y, "music on/off", 160)
-    clr_hb = gb.HintBox(screen, 580, hb_y, "discard records", 180)
-    hdr_hb = gb.HintBox(screen, 700, hb_y, "harder maze", 105)
+    esr_hb = gb.HintBox(screen,  90, hb_y, "easier maze")
+    p_c_hb = gb.HintBox(screen, 220, hb_y, "pause/continue")
+    nwg_hb = gb.HintBox(screen, 340, hb_y, "new game")
+    msc_hb = gb.HintBox(screen, 460, hb_y, "music on/off")
+    clr_hb = gb.HintBox(screen, 580, hb_y, "discard records")
+    hdr_hb = gb.HintBox(screen, 700, hb_y, "harder maze")
 
     # init icons
     name_dict = {"ESR":0, "P_C":1, "NWG":2, "MSC":3, "CLR":4, "HDR":5}
@@ -239,7 +239,7 @@ def main():
                     wins = 0
                     w_rec_txt.toggleTxt(str(wins)) 
                 
-                elif(all_icons[name_dict["MSC"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["MSC"]].state == "ACTIVE" and not paused):
                     if(sound_on):
                         pg.mixer.music.set_volume(0)
                     else:
@@ -265,14 +265,17 @@ def main():
         if(ps_clicked):     # pause/continue icon clicked
             ps_clicked = False
             if(paused):     # game paused -> game continue
-                print("pause image on")
+
+                if(sound_on):
+                    pg.mixer.music.set_volume(0.5)
+
                 all_icons[name_dict["P_C"]].loadImg(p_img_path)
                 key_pressed = False
                 paused = False
                 new_game = False
                 time_ref = time.time()
             else:           # game ongoing -> pause game
-                print("continue image on")
+                pg.mixer.music.set_volume(0)
                 all_icons[name_dict["P_C"]].loadImg(c_img_path)
                 paused = True
                 time_sh = time_sh + time.time() - time_ref

@@ -179,7 +179,7 @@ class Button():
         self.btn_txt.draw()
 
 class HintBox():
-    def __init__(self, screen, x_pos, y_pos, text, width):
+    def __init__(self, screen, x_pos, y_pos, text):
         self.scrn = screen
         self.x = x_pos
         self.y = y_pos
@@ -191,9 +191,7 @@ class HintBox():
         for i in range(len(lines)):
             temp = Text(self.scrn, lines[i], self.x+3, self.y + i*txt_size , hnt_txt_clr, txt_size, "MID")
             self.txt_box.append(temp)
-        
-        self.w = width
-        self.h = len(lines)*txt_size*1.05
+
     
     def splitText(self, text, limit):
         word_arr = []
@@ -202,19 +200,17 @@ class HintBox():
         line_arr = [word_arr[0]]
         char_count = len(word_arr[0])
         for word in word_arr[1:]:
-            # print(word, char_count + len(word))
+ 
             if(char_count + len(word) + 1 < limit):
                 line_arr[-1] = line_arr[-1] + " " + word
                 char_count = char_count + len(word) + 1
             else:
                 line_arr.append(word)
                 char_count = len(word)
-        for line in line_arr:
-            print("line:",line)    
+
         return line_arr
     
     def draw(self):
-        # pg.draw.rect(self.scrn, hnt_box_clr, (self.x, self.y, self.w, self.h))
         for line in self.txt_box:
             line.draw()
 
