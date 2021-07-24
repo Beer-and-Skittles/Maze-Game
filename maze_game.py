@@ -134,7 +134,7 @@ def main():
     pg.mixer.init()
     pg.mixer.music.set_volume(0.3)
     pg.mixer.music.load(folder_path + '/source/bg.mp3')
-    pg.mixer.music.play(-1)
+    # pg.mixer.music.play(-1)
 
     # set sound effects
     click_sound = pg.mixer.Sound(folder_path + '/source/click.mp3')
@@ -173,25 +173,28 @@ def main():
     t_rec_txt = gb.Text(screen, "", 370, 875, txt_clr, 50, "RIGHT")
     w_rec_txt = gb.Text(screen, str(wins), 735, 875, txt_clr, 50, "RIGHT")
 
+    # init hintbox
+    hb_y = 828
+    esr_hb = gb.HintBox(screen,  90, hb_y, "easier maze", 100)
+    p_c_hb = gb.HintBox(screen, 220, hb_y, "pause/continue", 160)
+    nwg_hb = gb.HintBox(screen, 340, hb_y, "new game", 90)
+    msc_hb = gb.HintBox(screen, 460, hb_y, "music on/off", 160)
+    clr_hb = gb.HintBox(screen, 580, hb_y, "discard records", 180)
+    hdr_hb = gb.HintBox(screen, 700, hb_y, "harder maze", 105)
+
     # init icons
-    all_icons = []
-    icon_dict = {"ESR":0, "P_C":1, "NWG":2, "MSC":3, "CLR":4, "HDR":5}
+    name_dict = {"ESR":0, "P_C":1, "NWG":2, "MSC":3, "CLR":4, "HDR":5}
     p_img_path  = folder_path + '/source/pause.png'
     c_img_path  = folder_path + '/source/continue.png'
-    easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 58, 760, 0.15)
-    ps_cn_icon  = gb.Icon(screen, folder_path+'/source/pause.png', 180, 760, 0.15)
-    nwg_icon    = gb.Icon(screen, folder_path+'/source/new_game.png', 300, 760, 0.15)
-    music_icon  = gb.Icon(screen, folder_path+'/source/music.png', 415, 760, 0.15)
-    clear_icon  = gb.Icon(screen, folder_path+'/source/clear.png', 540, 760, 0.15)
-    harder_icon = gb.Icon(screen, folder_path+'/source/harder.png', 658, 760, 0.15)
-    
-    all_icons.append(easier_icon)
-    all_icons.append(ps_cn_icon)
-    all_icons.append(nwg_icon)
-    all_icons.append(music_icon)
-    all_icons.append(clear_icon)
-    all_icons.append(harder_icon)
-    
+    icn_y = hb_y - 75
+    easier_icon = gb.Icon(screen, folder_path+'/source/easier.png', 58, icn_y, 0.12, esr_hb)
+    ps_cn_icon  = gb.Icon(screen, folder_path+'/source/pause.png', 185, icn_y, 0.12, p_c_hb)
+    nwg_icon    = gb.Icon(screen, folder_path+'/source/new_game.png', 310, icn_y, 0.12, nwg_hb)
+    music_icon  = gb.Icon(screen, folder_path+'/source/music.png', 430, icn_y, 0.12, msc_hb)
+    clear_icon  = gb.Icon(screen, folder_path+'/source/clear.png', 550, icn_y, 0.12, clr_hb)
+    harder_icon = gb.Icon(screen, folder_path+'/source/harder.png', 670, icn_y, 0.12, hdr_hb)
+    all_icons = [easier_icon, ps_cn_icon, nwg_icon, music_icon, clear_icon, harder_icon]
+
     time_ref = time.time()
     game = True
     while(game):
@@ -226,17 +229,17 @@ def main():
                         pg.mixer.Sound.play(click_sound)
 
                 # operations for clicked icons
-                if(all_icons[icon_dict["NWG"]].state == "ACTIVE"):
+                if(all_icons[name_dict["NWG"]].state == "ACTIVE"):
                     new_game = True
                 
-                elif(all_icons[icon_dict["CLR"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["CLR"]].state == "ACTIVE"):
                     new_game = True
                     maze_row = dft_row
                     maze_col = dft_col
                     wins = 0
                     w_rec_txt.toggleTxt(str(wins)) 
                 
-                elif(all_icons[icon_dict["MSC"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["MSC"]].state == "ACTIVE"):
                     if(sound_on):
                         pg.mixer.music.set_volume(0)
                     else:
@@ -244,16 +247,16 @@ def main():
 
                     sound_on = not sound_on
 
-                elif(all_icons[icon_dict["P_C"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["P_C"]].state == "ACTIVE"):
                     ps_clicked = True
 
-                elif(all_icons[icon_dict["ESR"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["ESR"]].state == "ACTIVE"):
                     if(maze_row > rc_l_bnd):
                         new_game = True
                         maze_row -= 1
                         maze_col -= 1
 
-                elif(all_icons[icon_dict["HDR"]].state == "ACTIVE"):
+                elif(all_icons[name_dict["HDR"]].state == "ACTIVE"):
                     if(maze_row < rc_h_bnd):
                         new_game = True
                         maze_row += 1
@@ -263,14 +266,14 @@ def main():
             ps_clicked = False
             if(paused):     # game paused -> game continue
                 print("pause image on")
-                all_icons[icon_dict["P_C"]].loadImg(p_img_path)
+                all_icons[name_dict["P_C"]].loadImg(p_img_path)
                 key_pressed = False
                 paused = False
                 new_game = False
                 time_ref = time.time()
             else:           # game ongoing -> pause game
                 print("continue image on")
-                all_icons[icon_dict["P_C"]].loadImg(c_img_path)
+                all_icons[name_dict["P_C"]].loadImg(c_img_path)
                 paused = True
                 time_sh = time_sh + time.time() - time_ref
 
@@ -330,8 +333,6 @@ def main():
         t_rec_txt.draw()
         w_rec_txt.draw()
         pg.display.update()
-
-
 
 if __name__ == '__main__':
     main()

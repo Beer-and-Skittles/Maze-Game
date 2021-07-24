@@ -5,7 +5,8 @@ btn_hvr_clr = (239, 105, 102)   # light vermillion
 btn_act_clr = (255, 167, 105)   # pastel orange
 btn_txt_clr = (  0,  52, 110)   # china blue
 
-hnt_txt_clr = (  0,  36,  81)  # black blue
+hnt_txt_clr = (255, 238, 164)
+# hnt_txt_clr = (  0,  36,  81)  # black blue
 hnt_box_clr = (153, 255, 255)  # azure
 
 icn_nul_clr = (255, 255, 255)   # white
@@ -17,8 +18,9 @@ bg_clr   = (0, 36, 81)      # muted indigo
 
 class Icon():
     
-    def __init__(self, screen, image_path, x_pos, y_pos, factor):
+    def __init__(self, screen, image_path, x_pos, y_pos, factor, hint_box):
         self.state = "DEFAULT"  # DEFAULT, HOVER, ACTIVE
+        self.hnt_bx = hint_box
         self.was = ""
         self.scrn = screen
         self.fct = factor
@@ -65,9 +67,11 @@ class Icon():
         color = None
         if(self.state == "ACTIVE"):
             color = icn_act_clr
+            self.hnt_bx.draw()
 
         elif(self.state == "HOVER"):
             color = icn_hvr_clr
+            self.hnt_bx.draw()
 
         elif(self.state == "DEFAULT"):
             color = icn_dft_clr
@@ -108,6 +112,11 @@ class Text():
     def toggleTxt(self, text):
         self.txt = self.font.render(text, 1, self.clr)
         self.x, self.y = self.align()
+    
+    def togglePos(self, x_pos, y_pos):
+        self.x = x_pos
+        self.y = y_pos
+        self.align()
     
     def draw(self):
         self.scrn.blit(self.txt, (self.x, self.y))
@@ -170,15 +179,42 @@ class Button():
         self.btn_txt.draw()
 
 class HintBox():
-    def __init__(self, screen, x_pos, y_pos, text, txt_size):
+    def __init__(self, screen, x_pos, y_pos, text, width):
         self.scrn = screen
         self.x = x_pos
         self.y = y_pos
-        self.hint = Text(self.scrn, text, self.x, self.y, hnt_txt_clr, 20 , "MID")
-        self.w = self.hint.len() * 1.2
-        self.h = txt_size * 1.2
+
+        line_len = 30
+        txt_size = 25
+        lines = self.splitText(text, line_len)
+        self.txt_box = []
+        for i in range(len(lines)):
+            temp = Text(self.scrn, lines[i], self.x+3, self.y + i*txt_size , hnt_txt_clr, txt_size, "MID")
+            self.txt_box.append(temp)
+        
+        self.w = width
+        self.h = len(lines)*txt_size*1.05
     
-    def show(self):
-        pg.draw.rect(self.scrn, hnt_box_clr, (self.x, self.y, self.w, self.h))
-        self.hint.draw()
+    def splitText(self, text, limit):
+        word_arr = []
+        word_arr = text.split(" ")
+
+        line_arr = [word_arr[0]]
+        char_count = len(word_arr[0])
+        for word in word_arr[1:]:
+            # print(word, char_count + len(word))
+            if(char_count + len(word) + 1 < limit):
+                line_arr[-1] = line_arr[-1] + " " + word
+                char_count = char_count + len(word) + 1
+            else:
+                line_arr.append(word)
+                char_count = len(word)
+        for line in line_arr:
+            print("line:",line)    
+        return line_arr
+    
+    def draw(self):
+        # pg.draw.rect(self.scrn, hnt_box_clr, (self.x, self.y, self.w, self.h))
+        for line in self.txt_box:
+            line.draw()
 
