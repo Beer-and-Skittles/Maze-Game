@@ -1,11 +1,14 @@
-# maze-game
+# Maze Game
 
-## subheader
-some description
-some more description
+## Objectives
+* Building an intuitive game for maze playing
+* Implementing 2 discrete algorithms: Randomized Prim's and Depth-First Search
 
-## subheader2
-hello world
+## Files
+* ***maze_game.py*** game interface
+* ***game_bar.py*** game elements, including classes *HintBox, Button, Text,* and *Icon*
+* ***maze_dfs.py*** maze algorithm implemented by Depth-First Search
+* ***maze_rp.py*** maze algorithm implemented by Randomized Prim's
 
-## subheader3
-master subheader
+## Execution
+* Play game by running ```maze_game.py``` 
